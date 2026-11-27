@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 
 // ============================================================================
@@ -50,7 +51,24 @@ export default function RenderizadoCondicional() {
         <button type="button" className="btn btn-danger" onClick={() => setNotificaciones(0)}>
           Poner a 0
         </button>
+
+        {/* Ticket 04: marcar todas como leídas */}
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={() => setNotificaciones(0)}
+          disabled={notificaciones === 0}
+        >
+          Marcar todas como leídas
+        </button>
       </div>
+
+      {/* Ticket 04: estado vacío */}
+      {notificaciones === 0 && (
+        <p>
+          Estás al día. No tienes notificaciones pendientes
+        </p>
+      )}
 
       <div className="grid-2">
         {/* 2. OPERADOR TERNARIO */}
