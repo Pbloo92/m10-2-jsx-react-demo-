@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 
 // ============================================================================
@@ -19,7 +20,18 @@ const formatearEuros = (cantidad) => `${cantidad.toFixed(2)} €`;
 export default function ExpresionesYEstilos() {
   const [precioBase, setPrecioBase] = useState(100);
   const [colorDestacado, setColorDestacado] = useState('#38bdf8');
-  const IVA = 0.21;
+
+  // Ticket 03: estado del IVA y descuento
+  const [tipoIVA, setTipoIVA] = useState(0.21);
+  const [descuento, setDescuento] = useState(0);
+
+  const IVA = tipoIVA;
+
+  // Cálculos de la factura
+  const importeDescontado = precioBase * (descuento / 100);
+  const baseImponible = precioBase - importeDescontado;
+  const cuotaIVA = baseImponible * IVA;
+  const totalFinal = baseImponible + cuotaIVA;
 
   // Objeto de estilos dinámico en JavaScript
   const estiloTarjetaDinamica = {
@@ -49,18 +61,58 @@ export default function ExpresionesYEstilos() {
             onChange={(e) => setPrecioBase(Number(e.target.value) || 0)}
           />
 
+          {/* Ticket 03: selector de IVA */}
+          <label htmlFor="iva-select">Tipo de IVA:</label>
+          <select
+            id="iva-select"
+            className="input"
+            value={tipoIVA}
+            onChange={(e) => setTipoIVA(Number(e.target.value))}
+          >
+            <option value={0.21}>General (21%)</option>
+            <option value={0.10}>Reducido (10%)</option>
+            <option value={0.04}>Superreducido (4%)</option>
+          </select>
+
+          {/* Ticket 03: campo de descuento */}
+          <label htmlFor="descuento-input">Descuento (%):</label>
+          <input
+            id="descuento-input"
+            type="number"
+            className="input"
+            min="0"
+            max="50"
+            value={descuento}
+            onChange={(e) => {
+              const valor = Number(e.target.value);
+              setDescuento(Math.min(50, Math.max(0, valor)));
+            }}
+          />
+
           <ul className="list">
             <li className="list-item">
-              <span>Operación matemática directa:</span>
-              <strong>{precioBase * IVA} € (IVA 21%)</strong>
+              <span>Precio Base:</span>
+              <strong>{formatearEuros(precioBase)}</strong>
             </li>
             <li className="list-item">
-              <span>Llamada a función:</span>
-              <strong>{formatearEuros(precioBase * (1 + IVA))}</strong>
+              <span>Importe Descontado:</span>
+              <strong>{formatearEuros(importeDescontado)}</strong>
             </li>
             <li className="list-item">
-              <span>Valores ignorados (true/false/null):</span>
-              <strong>[{true}{false}{null}{undefined}] (vacío)</strong>
+              <span>Base Imponible:</span>
+              <strong>{formatearEuros(baseImponible)}</strong>
+            </li>
+            <li className="list-item">
+              <span>Cuota de IVA ({IVA * 100}%):</span>
+              <strong>{formatearEuros(cuotaIVA)}</strong>
+            </li>
+            <li className="list-item">
+              <span>Total Final:</span>
+              <strong
+                style={descuento > 0 ? { color: '#22c55e' } : {}}
+              >
+                {formatearEuros(totalFinal)}
+              </strong>
             </li>
           </ul>
         </div>
