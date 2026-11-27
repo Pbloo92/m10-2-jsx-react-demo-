@@ -21,19 +21,31 @@ const SECCIONES = [
 
 export default function App() {
   const [activa, setActiva] = useState('01');
+  const [temaOscuro, setTemaOscuro] = useState(true);
 
   // Localizamos dinámicamente el componente a renderizar según la pestaña activa
   const seccionActual = SECCIONES.find((sec) => sec.id === activa);
   const ComponenteActivo = seccionActual.componente;
 
   return (
-    <div className="layout">
+    <div className={`layout ${temaOscuro ? 'dark' : 'light'}`}>
       <header className="header">
         <div>
           <h1>M10.2. JSX (JavaScript XML) con React</h1>
           <p>Demostración interactiva para exposición en clase · Abre los archivos de src/components/ en VS Code</p>
         </div>
-        <span className="pill">React 18 + Vite</span>
+
+        <div className="header-actions">
+          <span className="pill">React 18 + Vite</span>
+
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => setTemaOscuro(!temaOscuro)}
+          >
+            {temaOscuro ? '☀️ Modo claro' : '🌙 Modo oscuro'}
+          </button>
+        </div>
       </header>
 
       {/* Navegación generada dinámicamente con .map() y key única */}
@@ -54,6 +66,10 @@ export default function App() {
       <main>
         <ComponenteActivo />
       </main>
+
+      <footer className="footer">
+        <p>Pablo Muñoz Pedrero - 2ºDAM - Desarrollo de interfaces  · M10.2 JSX React · {new Date().getFullYear()}</p>
+      </footer>
     </div>
   );
 }
