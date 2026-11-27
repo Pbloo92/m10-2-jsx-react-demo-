@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 
 // ============================================================================
@@ -17,18 +18,43 @@ import { useState } from 'react';
 
 export default function EventosYSeguridadXSS() {
   const [ultimoEvento, setUltimoEvento] = useState('Ninguno todavía');
+  const [historial, setHistorial] = useState([]);
   const [entradaUsuario, setEntradaUsuario] = useState(
     "<img src=x onerror='alert(\"Ataque XSS\")' /> <script>alert(\"Hack\")</script>"
   );
 
+  // Registramos el evento y conservamos únicamente los últimos 5
+  const registrarEvento = (mensaje) => {
+    const evento = `${mensaje} a las ${new Date().toLocaleTimeString()}`;
+    setUltimoEvento(evento);
+    setHistorial((prev) => [evento, ...prev].slice(0, 5));
+  };
+
   // Manejador sin parámetros (se pasa como referencia: onClick={manejarClickSimple})
   const manejarClickSimple = () => {
-    setUltimoEvento(`Clic simple registrado a las ${new Date().toLocaleTimeString()}`);
+    registrarEvento('Clic simple registrado');
   };
 
   // Manejador con parámetros (requiere función flecha: onClick={() => manejarConParametro(...)})
   const manejarConParametro = (accion) => {
-    setUltimoEvento(`Acción ejecutada con parámetro: "${accion}"`);
+    registrarEvento(`Acción ejecutada con parámetro: "${accion}"`);
+  };
+
+  // Cadenas de prueba XSS: se muestran como texto, no se ejecutan
+  const pruebasXSS = [
+    '<script>alert("XSS")</script>',
+    '<img src=x onerror=alert("XSS")>',
+    '<svg onload=alert("XSS")></svg>'
+  ];
+
+  const cargarPruebaXSS = (payload) => {
+    setEntradaUsuario(payload);
+    registrarEvento('Payload XSS de prueba seleccionado');
+  };
+
+  const limpiarHistorial = () => {
+    setHistorial([]);
+    setUltimoEvento('Ninguno todavía');
   };
 
   return (
@@ -58,6 +84,30 @@ export default function EventosYSeguridadXSS() {
               onClick=&#123;() =&gt; fn(arg)&#125;
             </button>
           </div>
+
+          <h3 style={{ marginTop: '1rem' }}>Historial de eventos (máximo 5)</h3>
+          <button
+            type="button"
+            className="btn btn-danger"
+            onClick={limpiarHistorial}
+            disabled={historial.length === 0}
+          >
+            Limpiar historial
+          </button>
+
+          {historial.length === 0 ? (
+            <p className="subtitle" style={{ marginTop: '0.75rem' }}>
+              No hay eventos registrados.
+            </p>
+          ) : (
+            <ul className="list" style={{ marginTop: '0.75rem' }}>
+              {historial.map((evento, index) => (
+                <li key={`${evento}-${index}`} className="list-item">
+                  {evento}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         <div className="box box-warn">
@@ -70,6 +120,23 @@ export default function EventosYSeguridadXSS() {
             value={entradaUsuario}
             onChange={(e) => setEntradaUsuario(e.target.value)}
           />
+
+          <p style={{ marginTop: '0.75rem' }}>
+            <strong>Pruebas XSS:</strong>
+          </p>
+          <div className="btn-row">
+            {pruebasXSS.map((payload, index) => (
+              <button
+                key={index}
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => cargarPruebaXSS(payload)}
+              >
+                Prueba XSS {index + 1}
+              </button>
+            ))}
+          </div>
+
           <div
             style={{
               marginTop: '0.75rem',
